@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>eeaCronPicker — Demo</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .demo {
+      width: 100%;
+      max-width: 700px;
+    }
+
+    h1 {
+      font-size: 22px;
+      color: #303133;
+      margin-bottom: 8px;
+    }
+
+    .demo-subtitle {
+      color: #909399;
+      font-size: 13px;
+      margin-bottom: 32px;
+    }
+
+    .demo-block {
+      background: #fff;
+      border-radius: 10px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+
+    .demo-block h2 {
+      font-size: 15px;
+      color: #606266;
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+
+    .demo-output {
+      margin-top: 16px;
+      font-size: 13px;
+      color: #606266;
+    }
+
+    .demo-output code {
+      background: #f4f4f5;
+      color: #409eff;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .demo-locale-switcher {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .demo-locale-switcher button {
+      padding: 5px 14px;
+      border: 1px solid #dcdfe6;
+      border-radius: 6px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 13px;
+      color: #303133;
+      transition: all 0.2s;
+    }
+
+    .demo-locale-switcher button.active,
+    .demo-locale-switcher button:hover {
+      border-color: #409eff;
+      color: #409eff;
+    }
+
+    /* Пример кастомизации темы */
+    .theme-dark {
+      --eea-cron-bg: #1e1e2e;
+      --eea-cron-color: #cdd6f4;
+      --eea-cron-border: #45475a;
+      --eea-cron-border-radius: 8px;
+      --eea-cron-primary: #89b4fa;
+      --eea-cron-preview-bg: #181825;
+      --eea-cron-preview-color: #a6adc8;
+      --eea-cron-code-color: #89dceb;
+    }
+
+    .theme-green {
+      --eea-cron-primary: #67c23a;
+      --eea-cron-code-color: #67c23a;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="demo">
+      <h1>eeaCronPicker</h1>
+      <p class="demo-subtitle">Vue 3 компонент для выбора cron-расписания</p>
+
+      <!-- Базовый пример -->
+      <div class="demo-block">
+        <h2>Базовый пример</h2>
+        <eea-cron-picker v-model="cron1" />
+        <div class="demo-output">
+          v-model: <code>{{ cron1 }}</code>
+        </div>
+      </div>
+
+      <!-- Переключение локали -->
+      <div class="demo-block">
+        <h2>Поддержка локализации</h2>
+        <div class="demo-locale-switcher">
+          <button
+            v-for="l in ['ru','en']"
+            :key="l"
+            :class="{ active: locale2 === l }"
+            @click="locale2 = l"
+          >{{ l.toUpperCase() }}</button>
+        </div>
+        <eea-cron-picker v-model="cron2" :locale="locale2" />
+        <div class="demo-output">
+          v-model: <code>{{ cron2 }}</code>
+        </div>
+      </div>
+
+      <!-- Кастомная тема (тёмная) -->
+      <div class="demo-block" style="background:#1e1e2e;">
+        <h2 style="color:#a6adc8;">Кастомная тема (тёмная)</h2>
+        <eea-cron-picker v-model="cron3" class="theme-dark" />
+        <div class="demo-output" style="color:#a6adc8;">
+          v-model: <code style="background:#181825;color:#89dceb;">{{ cron3 }}</code>
+        </div>
+      </div>
+
+      <!-- Кастомная тема (зелёная) -->
+      <div class="demo-block">
+        <h2>Кастомная тема (зелёная)</h2>
+        <eea-cron-picker v-model="cron4" class="theme-green" />
+        <div class="demo-output">
+          v-model: <code style="color:#67c23a;">{{ cron4 }}</code>
+        </div>
+      </div>
+
+      <!-- Передача начального значения -->
+      <div class="demo-block">
+        <h2>Начальное значение (каждый понедельник в 09:30)</h2>
+        <eea-cron-picker v-model="cron5" />
+        <div class="demo-output">
+          v-model: <code>{{ cron5 }}</code>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Встраиваем компонент и локали прямо в страницу для демо -->
+  <script type="module">
+    // ─── Локали ────────────────────────────────────────────────────
+    const locales = {
+      ru: {
+        modeAt: 'В определённое время',
+        modeEvery: 'С интервалом',
+        repeatLabel: 'Повтор',
+        timeLabel: 'Время',
+        everyLabel: 'Каждые',
+        resultLabel: 'Cron-выражение',
+        repeatOptions: [
+          { value: 'minute', label: 'Каждую минуту' },
+          { value: 'hour',   label: 'Каждый час' },
+          { value: 'day',    label: 'Каждый день' },
+          { value: 'week',   label: 'Каждую неделю' },
+          { value: 'month',  label: 'Каждый месяц' },
+        ],
+        intervalUnits: [
+          { value: 'minute', label: 'минут' },
+          { value: 'hour',   label: 'часов' },
+          { value: 'day',    label: 'дней' },
+        ],
+        weekDays: [
+          { value: 0, label: 'Воскресенье' },
+          { value: 1, label: 'Понедельник' },
+          { value: 2, label: 'Вторник' },
+          { value: 3, label: 'Среда' },
+          { value: 4, label: 'Четверг' },
+          { value: 5, label: 'Пятница' },
+          { value: 6, label: 'Суббота' },
+        ],
+        monthDayLabel: 'День месяца',
+        previewEveryMinute: 'Каждую минуту',
+        previewAt: (repeat, extra, h, m) => {
+          const time = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`
+          switch (repeat) {
+            case 'minute': return 'Каждую минуту'
+            case 'hour':   return `Каждый час в :${String(m).padStart(2,'0')}`
+            case 'day':    return `Каждый день в ${time}`
+            case 'week':   return `Каждую неделю, ${extra} в ${time}`
+            case 'month':  return `Каждый месяц, ${extra}-го в ${time}`
+            default:       return ''
+          }
+        },
+        previewEvery: (n, unit) => {
+          switch (unit) {
+            case 'minute': return `Каждые ${n} минут`
+            case 'hour':   return `Каждые ${n} часов`
+            case 'day':    return `Каждые ${n} дней`
+            default:       return ''
+          }
+        },
+      },
+      en: {
+        modeAt: 'At specific time',
+        modeEvery: 'By interval',
+        repeatLabel: 'Repeat',
+        timeLabel: 'Time',
+        everyLabel: 'Every',
+        resultLabel: 'Cron expression',
+        repeatOptions: [
+          { value: 'minute', label: 'Every minute' },
+          { value: 'hour',   label: 'Every hour' },
+          { value: 'day',    label: 'Every day' },
+          { value: 'week',   label: 'Every week' },
+          { value: 'month',  label: 'Every month' },
+        ],
+        intervalUnits: [
+          { value: 'minute', label: 'minutes' },
+          { value: 'hour',   label: 'hours' },
+          { value: 'day',    label: 'days' },
+        ],
+        weekDays: [
+          { value: 0, label: 'Sunday' },
+          { value: 1, label: 'Monday' },
+          { value: 2, label: 'Tuesday' },
+          { value: 3, label: 'Wednesday' },
+          { value: 4, label: 'Thursday' },
+          { value: 5, label: 'Friday' },
+          { value: 6, label: 'Saturday' },
+        ],
+        monthDayLabel: 'Day of month',
+        previewEveryMinute: 'Every minute',
+        previewAt: (repeat, extra, h, m) => {
+          const time = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`
+          switch (repeat) {
+            case 'minute': return 'Every minute'
+            case 'hour':   return `Every hour at :${String(m).padStart(2,'0')}`
+            case 'day':    return `Every day at ${time}`
+            case 'week':   return `Every week on ${extra} at ${time}`
+            case 'month':  return `Every month on day ${extra} at ${time}`
+            default:       return ''
+          }
+        },
+        previewEvery: (n, unit) => {
+          switch (unit) {
+            case 'minute': return `Every ${n} minutes`
+            case 'hour':   return `Every ${n} hours`
+            case 'day':    return `Every ${n} days`
+            default:       return ''
+          }
+        },
+      },
+    }
+
+    // ─── Компонент eeaCronPicker ───────────────────────────────────
+    const eeaCronPicker = {
+      name: 'eeaCronPicker',
+      props: {
+        modelValue: { type: String, default: '* * * * *' },
+        locale: { type: [String, Object], default: 'ru' },
+      },
+      emits: ['update:modelValue'],
+      data() {
+        return {
+          mode: 'at',
+          atRepeat: 'day',
+          atHour: 9,
+          atMinute: 0,
+          atWeekDay: 1,
+          atMonthDay: 1,
+          everyValue: 30,
+          everyUnit: 'minute',
+        }
+      },
+      computed: {
+        t() {
+          if (typeof this.locale === 'object' && this.locale !== null) return this.locale
+          return locales[this.locale] || locales['ru']
+        },
+        hours() { return Array.from({ length: 24 }, (_, i) => i) },
+        minutes() { return Array.from({ length: 60 }, (_, i) => i) },
+        monthDays() { return Array.from({ length: 31 }, (_, i) => i + 1) },
+        everyValueOptions() {
+          switch (this.everyUnit) {
+            case 'minute': return Array.from({ length: 59 }, (_, i) => i + 1)
+            case 'hour':   return Array.from({ length: 23 }, (_, i) => i + 1)
+            case 'day':    return Array.from({ length: 30 }, (_, i) => i + 1)
+            default:       return Array.from({ length: 59 }, (_, i) => i + 1)
+          }
+        },
+        cronValue() {
+          return this.mode === 'at' ? this.buildAtCron() : this.buildEveryCron()
+        },
+        preview() {
+          if (this.mode === 'at') {
+            if (this.atRepeat === 'minute') return this.t.previewEveryMinute
+            let extra = ''
+            if (this.atRepeat === 'week')  extra = this.t.weekDays.find(d => d.value === this.atWeekDay)?.label || ''
+            if (this.atRepeat === 'month') extra = this.atMonthDay
+            return this.t.previewAt(this.atRepeat, extra, this.atHour, this.atMinute)
+          }
+          return this.t.previewEvery(this.everyValue, this.everyUnit)
+        },
+      },
+      watch: {
+        cronValue(val) { this.$emit('update:modelValue', val) },
+        everyUnit() {
+          const max = { minute: 59, hour: 23, day: 30 }[this.everyUnit] || 59
+          if (this.everyValue > max) this.everyValue = 1
+        },
+      },
+      mounted() {
+        if (this.modelValue && this.modelValue !== '* * * * *') this.parseCron(this.modelValue)
+        this.$emit('update:modelValue', this.cronValue)
+      },
+      methods: {
+        pad(n) { return String(n).padStart(2, '0') },
+        buildAtCron() {
+          const { atMinute: min, atHour: hour } = this
+          switch (this.atRepeat) {
+            case 'minute': return '* * * * *'
+            case 'hour':   return `${min} * * * *`
+            case 'day':    return `${min} ${hour} * * *`
+            case 'week':   return `${min} ${hour} * * ${this.atWeekDay}`
+            case 'month':  return `${min} ${hour} ${this.atMonthDay} * *`
+            default:       return '* * * * *'
+          }
+        },
+        buildEveryCron() {
+          const n = this.everyValue
+          switch (this.everyUnit) {
+            case 'minute': return `*/${n} * * * *`
+            case 'hour':   return `0 */${n} * * *`
+            case 'day':    return `0 0 */${n} * *`
+            default:       return '* * * * *'
+          }
+        },
+        parseCron(cron) {
+          const parts = cron.trim().split(/\s+/)
+          if (parts.length !== 5) return
+          const [min, hour, dom, , dow] = parts
+          if (min.startsWith('*/') || hour.startsWith('*/') || dom.startsWith('*/')) {
+            this.mode = 'every'
+            if (min.startsWith('*/'))  { this.everyUnit = 'minute'; this.everyValue = parseInt(min.slice(2)) || 30 }
+            else if (hour.startsWith('*/')) { this.everyUnit = 'hour'; this.everyValue = parseInt(hour.slice(2)) || 1 }
+            else if (dom.startsWith('*/'))  { this.everyUnit = 'day'; this.everyValue = parseInt(dom.slice(2)) || 1 }
+            return
+          }
+          this.mode = 'at'
+          if (min === '*' && hour === '*') { this.atRepeat = 'minute'; return }
+          const parsedMin = parseInt(min), parsedHour = parseInt(hour)
+          if (!isNaN(parsedMin)) this.atMinute = parsedMin
+          if (!isNaN(parsedHour)) this.atHour = parsedHour
+          if (dom !== '*') { this.atRepeat = 'month'; this.atMonthDay = parseInt(dom) || 1 }
+          else if (dow !== '*') { this.atRepeat = 'week'; this.atWeekDay = parseInt(dow) || 1 }
+          else if (hour !== '*') this.atRepeat = 'day'
+          else this.atRepeat = 'hour'
+        },
+      },
+      template: `
+        <div class="eea-cron-picker">
+          <div class="eea-cron-picker__modes">
+            <label class="eea-cron-picker__mode-label">
+              <input type="radio" name="cronMode" value="at" v-model="mode" />
+              <span>{{ t.modeAt }}</span>
+            </label>
+            <label class="eea-cron-picker__mode-label">
+              <input type="radio" name="cronMode" value="every" v-model="mode" />
+              <span>{{ t.modeEvery }}</span>
+            </label>
+          </div>
+
+          <div v-if="mode === 'at'" class="eea-cron-picker__section">
+            <div class="eea-cron-picker__row">
+              <label class="eea-cron-picker__field-label">{{ t.repeatLabel }}</label>
+              <select class="eea-cron-picker__select" v-model="atRepeat">
+                <option v-for="opt in t.repeatOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+              </select>
+            </div>
+            <div v-if="atRepeat === 'hour'" class="eea-cron-picker__row">
+              <label class="eea-cron-picker__field-label">{{ t.timeLabel }}</label>
+              <span class="eea-cron-picker__colon">:</span>
+              <select class="eea-cron-picker__select eea-cron-picker__select--time" v-model="atMinute">
+                <option v-for="m in minutes" :key="m" :value="m">{{ pad(m) }}</option>
+              </select>
+            </div>
+            <div v-if="atRepeat === 'week'" class="eea-cron-picker__row">
+              <label class="eea-cron-picker__field-label">{{ t.weekDays[1]?.label }}</label>
+              <select class="eea-cron-picker__select" v-model="atWeekDay">
+                <option v-for="d in t.weekDays" :key="d.value" :value="d.value">{{ d.label }}</option>
+              </select>
+            </div>
+            <div v-if="atRepeat === 'month'" class="eea-cron-picker__row">
+              <label class="eea-cron-picker__field-label">{{ t.monthDayLabel }}</label>
+              <select class="eea-cron-picker__select eea-cron-picker__select--time" v-model="atMonthDay">
+                <option v-for="d in monthDays" :key="d" :value="d">{{ d }}</option>
+              </select>
+            </div>
+            <div v-if="['day','week','month'].includes(atRepeat)" class="eea-cron-picker__row">
+              <label class="eea-cron-picker__field-label">{{ t.timeLabel }}</label>
+              <select class="eea-cron-picker__select eea-cron-picker__select--time" v-model="atHour">
+                <option v-for="h in hours" :key="h" :value="h">{{ pad(h) }}</option>
+              </select>
+              <span class="eea-cron-picker__colon">:</span>
+              <select class="eea-cron-picker__select eea-cron-picker__select--time" v-model="atMinute">
+                <option v-for="m in minutes" :key="m" :value="m">{{ pad(m) }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div v-if="mode === 'every'" class="eea-cron-picker__section">
+            <div class="eea-cron-picker__row">
+              <label class="eea-cron-picker__field-label">{{ t.everyLabel }}</label>
+              <select class="eea-cron-picker__select eea-cron-picker__select--time" v-model="everyValue">
+                <option v-for="n in everyValueOptions" :key="n" :value="n">{{ n }}</option>
+              </select>
+              <select class="eea-cron-picker__select" v-model="everyUnit">
+                <option v-for="u in t.intervalUnits" :key="u.value" :value="u.value">{{ u.label }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="eea-cron-picker__preview">
+            <span class="eea-cron-picker__preview-text">{{ preview }}</span>
+            <code class="eea-cron-picker__result">{{ cronValue }}</code>
+          </div>
+        </div>
+      `,
+    }
+
+    // ─── CSS компонента ────────────────────────────────────────────
+    const style = document.createElement('style')
+    style.textContent = `
+      :root {
+        --eea-cron-font-family: inherit;
+        --eea-cron-font-size: 14px;
+        --eea-cron-color: #303133;
+        --eea-cron-bg: #ffffff;
+        --eea-cron-border: #dcdfe6;
+        --eea-cron-border-radius: 6px;
+        --eea-cron-primary: #409eff;
+        --eea-cron-preview-bg: #f4f4f5;
+        --eea-cron-preview-color: #606266;
+        --eea-cron-code-color: #409eff;
+        --eea-cron-gap: 10px;
+        --eea-cron-padding: 16px;
+      }
+      .eea-cron-picker {
+        font-family: var(--eea-cron-font-family);
+        font-size: var(--eea-cron-font-size);
+        color: var(--eea-cron-color);
+        background: var(--eea-cron-bg);
+        border: 1px solid var(--eea-cron-border);
+        border-radius: var(--eea-cron-border-radius);
+        padding: var(--eea-cron-padding);
+        display: inline-flex;
+        flex-direction: column;
+        gap: var(--eea-cron-gap);
+        min-width: 320px;
+      }
+      .eea-cron-picker__modes { display: flex; gap: 20px; }
+      .eea-cron-picker__mode-label { display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; }
+      .eea-cron-picker__mode-label input[type="radio"] { accent-color: var(--eea-cron-primary); cursor: pointer; width: 16px; height: 16px; }
+      .eea-cron-picker__section { display: flex; flex-direction: column; gap: var(--eea-cron-gap); }
+      .eea-cron-picker__row { display: flex; align-items: center; gap: 8px; }
+      .eea-cron-picker__field-label { min-width: 110px; color: var(--eea-cron-preview-color); }
+      .eea-cron-picker__select {
+        appearance: none; -webkit-appearance: none;
+        background-color: var(--eea-cron-bg);
+        border: 1px solid var(--eea-cron-border);
+        border-radius: var(--eea-cron-border-radius);
+        color: var(--eea-cron-color);
+        font-size: var(--eea-cron-font-size);
+        font-family: var(--eea-cron-font-family);
+        padding: 5px 28px 5px 10px;
+        cursor: pointer; outline: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23909399' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        transition: border-color 0.2s;
+      }
+      .eea-cron-picker__select:hover { border-color: var(--eea-cron-primary); }
+      .eea-cron-picker__select:focus { border-color: var(--eea-cron-primary); box-shadow: 0 0 0 2px rgba(64,158,255,.2); }
+      .eea-cron-picker__select--time { width: 70px; }
+      .eea-cron-picker__colon { font-weight: 600; color: var(--eea-cron-preview-color); }
+      .eea-cron-picker__preview {
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 12px;
+        background: var(--eea-cron-preview-bg);
+        border-radius: var(--eea-cron-border-radius);
+        padding: 8px 12px; margin-top: 4px;
+      }
+      .eea-cron-picker__preview-text { color: var(--eea-cron-preview-color); font-size: 13px; }
+      .eea-cron-picker__result { font-family: monospace; font-size: var(--eea-cron-font-size); color: var(--eea-cron-code-color); font-weight: 600; letter-spacing: 0.5px; white-space: nowrap; }
+    `
+    document.head.appendChild(style)
+
+    // ─── Vue приложение ────────────────────────────────────────────
+    const { createApp } = Vue
+    createApp({
+      components: { eeaCronPicker },
+      data() {
+        return {
+          cron1: '* * * * *',
+          cron2: '* * * * *',
+          cron3: '* * * * *',
+          cron4: '* * * * *',
+          cron5: '30 9 * * 1',  // каждый понедельник в 09:30
+          locale2: 'ru',
+        }
+      },
+    }).mount('#app')
+  </script>
+</body>
+</html>
