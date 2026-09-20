@@ -1,0 +1,21 @@
+# Исходники (уже в dist)
+# src не игнорируем — полезен для отладки через source
+
+# Демо и dev-файлы
+demo.html
+
+# Конфиги разработки
+vite.config.js
+.gitignore
+.npmignore
+
+# node_modules
+node_modules/
+
+# Логи
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
