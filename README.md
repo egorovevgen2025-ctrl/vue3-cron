@@ -55,10 +55,11 @@ export default {
 
 ## Props
 
-| Prop         | Тип               | По умолчанию  | Описание                                      |
-|--------------|-------------------|---------------|-----------------------------------------------|
-| `modelValue` | `String`          | `* * * * *`   | Cron-выражение (используется через `v-model`) |
-| `locale`     | `String / Object` | `'ru'`        | Язык интерфейса или кастомный объект локали   |
+| Prop         | Тип               | По умолчанию  | Описание                                                    |
+|--------------|-------------------|---------------|-------------------------------------------------------------|
+| `modelValue` | `String`          | `* * * * *`   | Cron-выражение (используется через `v-model`)               |
+| `locale`     | `String / Object` | `'ru'`        | Язык интерфейса или кастомный объект локали                 |
+| `translator` | `Function`        | `null`        | Функция перевода из внешнего i18n-фреймворка. Если передана — `locale` игнорируется |
 
 ## Events
 
@@ -70,7 +71,39 @@ export default {
 
 ## Локализация
 
-### Встроенные локали
+Компонент поддерживает три способа локализации — в порядке приоритета:
+
+### 1. Внешний i18n-фреймворк через `translator`
+
+Передай функцию перевода `(key, params?) => string` из любого фреймворка:
+
+```vue
+<!-- vue-i18n -->
+<eeaCronPicker v-model="cron" :translator="$t" />
+
+<!-- i18next -->
+<eeaCronPicker v-model="cron" :translator="(key, p) => i18next.t(key, p)" />
+
+<!-- кастомная функция -->
+<eeaCronPicker v-model="cron" :translator="(key) => myDict[key]" />
+```
+
+Добавь ключи из файла `src/i18n-keys.js` в свои переводы:
+
+```js
+// messages.ru.js
+export default {
+  eeaCronPicker: {
+    modeAt:    'В определённое время',
+    modeEvery: 'С интервалом',
+    // ... полный список ключей в src/i18n-keys.js
+  }
+}
+```
+
+Файл `src/i18n-keys.js` содержит экспорт `KEYS` (все константы ключей) и `messages` (готовые переводы на `ru` и `en` для вставки в свой проект).
+
+### 2. Встроенные локали через `locale`
 
 ```vue
 <!-- Русский (по умолчанию) -->
@@ -80,7 +113,7 @@ export default {
 <eeaCronPicker v-model="cron" locale="en" />
 ```
 
-### Кастомная локаль
+### 3. Кастомный объект локали
 
 Передай объект со своими переводами:
 
@@ -95,7 +128,6 @@ const myLocale = {
   repeatLabel: 'Wiederholen',
   timeLabel: 'Zeit',
   everyLabel: 'Alle',
-  resultLabel: 'Cron-Ausdruck',
   repeatOptions: [
     { value: 'minute', label: 'Jede Minute' },
     { value: 'hour',   label: 'Jede Stunde' },

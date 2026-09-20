@@ -109,6 +109,7 @@
 
 <script>
 import builtinLocales from './locales.js'
+import { KEYS } from './i18n-keys.js'
 
 export default {
   name: 'eeaCronPicker',
@@ -118,9 +119,29 @@ export default {
       type: String,
       default: '* * * * *',
     },
+    /**
+     * Встроенная локаль: 'ru' | 'en'
+     * или кастомный объект локали.
+     * Игнорируется если передан translator.
+     */
     locale: {
       type: [String, Object],
       default: 'ru',
+    },
+    /**
+     * Функция перевода из любого i18n-фреймворка.
+     * Сигнатура: (key: string, params?: object) => string
+     *
+     * Примеры:
+     *   vue-i18n:  :translator="$t"
+     *   i18next:   :translator="i18next.t"
+     *   кастомный: :translator="(key) => myDict[key]"
+     *
+     * Если передан — locale игнорируется.
+     */
+    translator: {
+      type: Function,
+      default: null,
     },
   },
 
@@ -144,11 +165,75 @@ export default {
   },
 
   computed: {
-    // Разрешаем локаль: строка → встроенная, объект → кастомная
+    /**
+     * Резолвим локаль в порядке приоритета:
+     * 1. translator (внешний i18n-фреймворк) → строим объект локали через него
+     * 2. locale-объект (кастомная локаль целиком)
+     * 3. locale-строка → встроенная локаль ('ru' / 'en')
+     * 4. fallback → 'ru'
+     */
     t() {
+      // Приоритет 1: внешний translator
+      if (typeof this.translator === 'function') {
+        const tr = this.translator
+        const pad = (n) => String(n).padStart(2, '0')
+        return {
+          modeAt:    tr(KEYS.modeAt),
+          modeEvery: tr(KEYS.modeEvery),
+          repeatLabel:   tr(KEYS.repeatLabel),
+          timeLabel:     tr(KEYS.timeLabel),
+          everyLabel:    tr(KEYS.everyLabel),
+          monthDayLabel: tr(KEYS.monthDayLabel),
+          previewEveryMinute: tr(KEYS.previewEveryMinute),
+          repeatOptions: [
+            { value: 'minute', label: tr(KEYS.repeatMinute) },
+            { value: 'hour',   label: tr(KEYS.repeatHour) },
+            { value: 'day',    label: tr(KEYS.repeatDay) },
+            { value: 'week',   label: tr(KEYS.repeatWeek) },
+            { value: 'month',  label: tr(KEYS.repeatMonth) },
+          ],
+          intervalUnits: [
+            { value: 'minute', label: tr(KEYS.unitMinutes) },
+            { value: 'hour',   label: tr(KEYS.unitHours) },
+            { value: 'day',    label: tr(KEYS.unitDays) },
+          ],
+          weekDays: [
+            { value: 0, label: tr(KEYS.daySunday) },
+            { value: 1, label: tr(KEYS.dayMonday) },
+            { value: 2, label: tr(KEYS.dayTuesday) },
+            { value: 3, label: tr(KEYS.dayWednesday) },
+            { value: 4, label: tr(KEYS.dayThursday) },
+            { value: 5, label: tr(KEYS.dayFriday) },
+            { value: 6, label: tr(KEYS.daySaturday) },
+          ],
+          previewAt: (repeat, extra, h, m) => {
+            const time = `${pad(h)}:${pad(m)}`
+            switch (repeat) {
+              case 'minute': return tr(KEYS.previewEveryMinute)
+              case 'hour':   return tr(KEYS.previewHour,  { m: pad(m) })
+              case 'day':    return tr(KEYS.previewDay,   { time })
+              case 'week':   return tr(KEYS.previewWeek,  { day: extra, time })
+              case 'month':  return tr(KEYS.previewMonth, { date: extra, time })
+              default:       return ''
+            }
+          },
+          previewEvery: (n, unit) => {
+            switch (unit) {
+              case 'minute': return tr(KEYS.previewEveryMinutes, { n })
+              case 'hour':   return tr(KEYS.previewEveryHours,   { n })
+              case 'day':    return tr(KEYS.previewEveryDays,    { n })
+              default:       return ''
+            }
+          },
+        }
+      }
+
+      // Приоритет 2: кастомный объект локали
       if (typeof this.locale === 'object' && this.locale !== null) {
         return this.locale
       }
+
+      // Приоритет 3: встроенная локаль по строке, fallback 'ru'
       return builtinLocales[this.locale] || builtinLocales['ru']
     },
 

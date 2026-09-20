@@ -165,6 +165,26 @@
         </div>
       </div>
 
+      <!-- Пример с внешним translator (эмуляция vue-i18n / i18next) -->
+      <div class="demo-block">
+        <h2>Внешний translator (эмуляция vue-i18n)</h2>
+        <p style="font-size:13px;color:#909399;margin-bottom:12px;">
+          Передаём функцию <code style="background:#f4f4f5;padding:2px 6px;border-radius:4px;">:translator="myTranslator"</code> — компонент использует её вместо встроенных локалей.
+        </p>
+        <div class="demo-locale-switcher">
+          <button
+            v-for="l in ['ru','en','de']"
+            :key="l"
+            :class="{ active: translatorLang === l }"
+            @click="translatorLang = l"
+          >{{ l.toUpperCase() }}</button>
+        </div>
+        <eea-cron-picker v-model="cron6" :translator="myTranslator" />
+        <div class="demo-output">
+          v-model: <code>{{ cron6 }}</code>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -517,6 +537,109 @@
     `
     document.head.appendChild(style)
 
+    // ─── Словари для эмуляции внешнего translator ─────────────────
+    const externalMessages = {
+      ru: {
+        'eeaCronPicker.modeAt':        'В определённое время',
+        'eeaCronPicker.modeEvery':     'С интервалом',
+        'eeaCronPicker.repeatLabel':   'Повтор',
+        'eeaCronPicker.timeLabel':     'Время',
+        'eeaCronPicker.everyLabel':    'Каждые',
+        'eeaCronPicker.monthDayLabel': 'День месяца',
+        'eeaCronPicker.repeat.minute': 'Каждую минуту',
+        'eeaCronPicker.repeat.hour':   'Каждый час',
+        'eeaCronPicker.repeat.day':    'Каждый день',
+        'eeaCronPicker.repeat.week':   'Каждую неделю',
+        'eeaCronPicker.repeat.month':  'Каждый месяц',
+        'eeaCronPicker.unit.minutes':  'минут',
+        'eeaCronPicker.unit.hours':    'часов',
+        'eeaCronPicker.unit.days':     'дней',
+        'eeaCronPicker.day.sunday':    'Воскресенье',
+        'eeaCronPicker.day.monday':    'Понедельник',
+        'eeaCronPicker.day.tuesday':   'Вторник',
+        'eeaCronPicker.day.wednesday': 'Среда',
+        'eeaCronPicker.day.thursday':  'Четверг',
+        'eeaCronPicker.day.friday':    'Пятница',
+        'eeaCronPicker.day.saturday':  'Суббота',
+        'eeaCronPicker.preview.everyMinute':  'Каждую минуту',
+        'eeaCronPicker.preview.hour':         'Каждый час в :{m}',
+        'eeaCronPicker.preview.day':          'Каждый день в {time}',
+        'eeaCronPicker.preview.week':         'Каждую неделю, {day} в {time}',
+        'eeaCronPicker.preview.month':        'Каждый месяц, {date}-го в {time}',
+        'eeaCronPicker.preview.everyMinutes': 'Каждые {n} минут',
+        'eeaCronPicker.preview.everyHours':   'Каждые {n} часов',
+        'eeaCronPicker.preview.everyDays':    'Каждые {n} дней',
+      },
+      en: {
+        'eeaCronPicker.modeAt':        'At specific time',
+        'eeaCronPicker.modeEvery':     'By interval',
+        'eeaCronPicker.repeatLabel':   'Repeat',
+        'eeaCronPicker.timeLabel':     'Time',
+        'eeaCronPicker.everyLabel':    'Every',
+        'eeaCronPicker.monthDayLabel': 'Day of month',
+        'eeaCronPicker.repeat.minute': 'Every minute',
+        'eeaCronPicker.repeat.hour':   'Every hour',
+        'eeaCronPicker.repeat.day':    'Every day',
+        'eeaCronPicker.repeat.week':   'Every week',
+        'eeaCronPicker.repeat.month':  'Every month',
+        'eeaCronPicker.unit.minutes':  'minutes',
+        'eeaCronPicker.unit.hours':    'hours',
+        'eeaCronPicker.unit.days':     'days',
+        'eeaCronPicker.day.sunday':    'Sunday',
+        'eeaCronPicker.day.monday':    'Monday',
+        'eeaCronPicker.day.tuesday':   'Tuesday',
+        'eeaCronPicker.day.wednesday': 'Wednesday',
+        'eeaCronPicker.day.thursday':  'Thursday',
+        'eeaCronPicker.day.friday':    'Friday',
+        'eeaCronPicker.day.saturday':  'Saturday',
+        'eeaCronPicker.preview.everyMinute':  'Every minute',
+        'eeaCronPicker.preview.hour':         'Every hour at :{m}',
+        'eeaCronPicker.preview.day':          'Every day at {time}',
+        'eeaCronPicker.preview.week':         'Every week on {day} at {time}',
+        'eeaCronPicker.preview.month':        'Every month on day {date} at {time}',
+        'eeaCronPicker.preview.everyMinutes': 'Every {n} minutes',
+        'eeaCronPicker.preview.everyHours':   'Every {n} hours',
+        'eeaCronPicker.preview.everyDays':    'Every {n} days',
+      },
+      de: {
+        'eeaCronPicker.modeAt':        'Zu bestimmter Zeit',
+        'eeaCronPicker.modeEvery':     'Mit Intervall',
+        'eeaCronPicker.repeatLabel':   'Wiederholen',
+        'eeaCronPicker.timeLabel':     'Uhrzeit',
+        'eeaCronPicker.everyLabel':    'Alle',
+        'eeaCronPicker.monthDayLabel': 'Tag des Monats',
+        'eeaCronPicker.repeat.minute': 'Jede Minute',
+        'eeaCronPicker.repeat.hour':   'Jede Stunde',
+        'eeaCronPicker.repeat.day':    'Jeden Tag',
+        'eeaCronPicker.repeat.week':   'Jede Woche',
+        'eeaCronPicker.repeat.month':  'Jeden Monat',
+        'eeaCronPicker.unit.minutes':  'Minuten',
+        'eeaCronPicker.unit.hours':    'Stunden',
+        'eeaCronPicker.unit.days':     'Tage',
+        'eeaCronPicker.day.sunday':    'Sonntag',
+        'eeaCronPicker.day.monday':    'Montag',
+        'eeaCronPicker.day.tuesday':   'Dienstag',
+        'eeaCronPicker.day.wednesday': 'Mittwoch',
+        'eeaCronPicker.day.thursday':  'Donnerstag',
+        'eeaCronPicker.day.friday':    'Freitag',
+        'eeaCronPicker.day.saturday':  'Samstag',
+        'eeaCronPicker.preview.everyMinute':  'Jede Minute',
+        'eeaCronPicker.preview.hour':         'Jede Stunde um :{m}',
+        'eeaCronPicker.preview.day':          'Jeden Tag um {time}',
+        'eeaCronPicker.preview.week':         'Jede Woche, {day} um {time}',
+        'eeaCronPicker.preview.month':        'Jeden Monat, {date}. um {time}',
+        'eeaCronPicker.preview.everyMinutes': 'Alle {n} Minuten',
+        'eeaCronPicker.preview.everyHours':   'Alle {n} Stunden',
+        'eeaCronPicker.preview.everyDays':    'Alle {n} Tage',
+      },
+    }
+
+    // Простая интерполяция {key} → value
+    function interpolate(str, params) {
+      if (!params) return str
+      return str.replace(/\{(\w+)\}/g, (_, k) => params[k] ?? `{${k}}`)
+    }
+
     // ─── Vue приложение ────────────────────────────────────────────
     const { createApp } = Vue
     createApp({
@@ -527,9 +650,18 @@
           cron2: '* * * * *',
           cron3: '* * * * *',
           cron4: '* * * * *',
-          cron5: '30 9 * * 1',  // каждый понедельник в 09:30
+          cron5: '30 9 * * 1',
+          cron6: '* * * * *',
           locale2: 'ru',
+          translatorLang: 'ru',
         }
+      },
+      computed: {
+        // Эмулируем $t из vue-i18n: (key, params?) => string
+        myTranslator() {
+          const dict = externalMessages[this.translatorLang] || externalMessages['ru']
+          return (key, params) => interpolate(dict[key] ?? key, params)
+        },
       },
     }).mount('#app')
   </script>
